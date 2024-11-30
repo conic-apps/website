@@ -2,6 +2,7 @@ use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+mod pages;
 mod routes;
 
 static CONFIG: OnceCell<Config> = OnceCell::new();
