@@ -1,4 +1,4 @@
-use axum::Router;
+use axum::{routing::get, Router};
 use tower_http::services::ServeDir;
 
 pub fn api() -> Router {
@@ -7,6 +7,8 @@ pub fn api() -> Router {
 
 pub fn web() -> Router {
     Router::new()
+        .route("/", get(crate::pages::index_template))
+        .route("/download", get(crate::pages::download_template))
 }
 
 pub fn static_files() -> Router {

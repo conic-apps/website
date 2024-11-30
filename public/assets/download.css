@@ -1,0 +1,75 @@
+body > main {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+* {
+  color: #fff;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1 {
+  font-size: 60px;
+  font-weight: 700;
+  margin: 0;
+}
+
+p {
+  font-size: 22px;
+  font-weight: 400;
+  color: #ffffffbb;
+  margin-top: 15px;
+}
+
+a.button {
+  text-decoration: none;
+  padding: 12px 36px;
+  background-color: #0078d4;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 24px;
+}
+
+a.button i {
+  font-family: fa-pro;
+  font-style: normal;
+  font-size: 20px;
+}
+
+a.button > div > span {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+a.button > span {
+  font-size: 12px;
+  margin-top: 8px;
+  font-weight: 700;
+  color: #d6d6d6;
+}
+
+.small-button {
+    font-size: 12px;
+    padding: 4px 8px;
+  background-color: #0078d4;
+border-radius: 6px;
+text-decoration: none;
+}
+
+main>div>div {
+    text-align: center;
+}
+
+i.brand {
+    font-family: fa-brands;
+    font-style: normal;
+    font-size: 90px;
+    margin: auto;
+    margin-bottom: 200px;
+}

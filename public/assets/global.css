@@ -1,0 +1,125 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+*::selection {
+    background-color: #31699a75;
+    color: #ffffff;
+}
+
+/* @font-face {
+    font-family: minecraft_ten;
+    src: url(/assets/MinecraftTen.ttf);
+} */
+
+/* @font-face {
+    font-family: fa-pro;
+    font-display: block;
+    font-weight: 700;
+    src: url(/assets/fa-pro//fa-brands-400.woff2);
+} */
+
+/* @font-face {
+    font-family: fa-pro;
+    font-style: normal;
+    font-weight: 900;
+    font-display: block;
+    src: url(/assets/fa-pro//fa-duotone-900.woff2) format("woff2"), url(../fonts/fa-pro/fa-duotone-900.woff2) format("truetype");
+} */
+
+/* @font-face {
+    font-family: fa-pro;
+    font-display: block;
+    font-weight: 500;
+    src: url(/assets/fa-pro/fa-light-300.woff2);
+} */
+
+@font-face {
+    font-family: fa-pro;
+    font-display: block;
+    font-weight: 400;
+    src: url(/assets/fa-pro/fa-regular-400.woff2);
+}
+
+/* @font-face {
+    font-family: fa-pro;
+    font-display: block;
+    font-weight: 300;
+    src: url(/assets/fa-pro/fa-sharp-solid-900.woff2);
+} */
+/* 
+@font-face {
+    font-family: fa-pro;
+    font-display: block;
+    font-weight: 200;
+    src: url(/assets/fa-pro/fa-solid-900.woff2);
+} */
+
+/* @font-face {
+    font-family: fa-pro-thin;
+    font-display: block;
+    font-weight: 100;
+    src: url(/assets/fa-pro/fa-thin-100.woff2);
+} */
+
+@font-face {
+    font-family: fa-brands;
+    src: url(/assets/fa-pro/fa-brands-400.woff2);
+}
+
+/* @font-face {
+    font-family: fa-pro;
+    font-display: block;
+    font-weight: 800;
+    src: url(/assets/fa-pro/fa-solid-900.woff2);
+} */
+
+i.rocket-launch::before {
+    content: "\e027";
+}
+
+i.feather::before {
+    content: "\f52d";
+}
+
+i.car-burst::before {
+    content: "\f5e1";
+}
+
+i.puzzle-piece-simple::before {
+    content: "\e231";
+}
+
+i.browsers::before {
+    content: "\e0cb";
+}
+
+i.bullseye-pointer::before {
+    content: "\f649";
+}
+
+i.bars::before {
+    content: "\f0c9";
+}
+
+i.lock::before {
+    content: "\f023"
+}
+i.download::before {
+    content: "\f019";
+}
+i.windows::before {
+    content: "\f17a"
+}
+i.arrow-down-to-line::before {
+    content: "\f33d";
+}
+
+i.linux::before {
+    content: "\f17c";
+}
+i.macos::before, i.apple::before {
+    content: "\f179";
+}
