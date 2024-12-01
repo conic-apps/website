@@ -7,8 +7,8 @@ pub fn api() -> Router {
 
 pub fn web() -> Router {
     Router::new()
-        .route("/", get(crate::pages::index_template))
-        .route("/download", get(crate::pages::download_template))
+        .route("/", get(crate::controllers::home_template))
+        .route("/download", get(crate::controllers::download_template))
 }
 
 pub fn static_files() -> Router {
