@@ -7,8 +7,10 @@ use serde::{Deserialize, Serialize};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod controllers;
+mod listeners;
 mod models;
 mod routes;
+mod tasks;
 
 static CONFIG: OnceCell<Config> = OnceCell::new();
 
@@ -47,7 +49,10 @@ async fn main() {
         .merge(routes::web())
         .merge(routes::static_files());
 
-    // run our app with hyper, listening globally on port 3000
+    // run schedule tasks
+    tokio::spawn(crate::tasks::run_tasks());
+
+    // run app
     let attr = format!("{}:{}", config.address, config.port);
     let listener = tokio::net::TcpListener::bind(&attr).await.unwrap();
     println!("Server is running on {attr}");
