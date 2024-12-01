@@ -1,8 +1,13 @@
+// Amethyst Launcher Website
+// Copyright 2022-2025 Broken-Deer and contributors. All rights reserved.
+// SPDX-License-Identifier: GPL-3.0-only
+
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod controllers;
+mod models;
 mod routes;
 
 static CONFIG: OnceCell<Config> = OnceCell::new();
