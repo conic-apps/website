@@ -4,6 +4,7 @@
 
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
+use sqlx::postgres::PgPoolOptions;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod controllers;
@@ -26,24 +27,26 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
     // load config
-    let config = match load_config().await {
-        Ok(x) => x,
-        Err(_) => {
-            let default_config = Config::default();
-            tokio::fs::write(
-                "Conic.toml",
-                toml::to_string_pretty(&default_config).unwrap(),
-            )
-            .await
-            .expect("Cannot write config file");
-            default_config
-        }
-    };
+    let config =  load_config().await.expect("Could not load config");
 
     CONFIG
         .set(config.clone())
         .expect("Could not set global config");
 
+    let database_url = format!(
+        "postgres://{user}:{password}@{host}/{database}",
+        user = config.database.user,
+        password = config.database.password,
+        host= config.database.host,
+        database = config.database.database
+    );
+    let db = PgPoolOptions::new().max_connections(10).connect(&database_url).await.expect("Could not connect to database");
+
+    // This embeds database migrations in the application binary so we can ensure the database
+    // is migrated correctly on startup
+    sqlx::migrate!().run(&db).await.unwrap();
+
+    
     let router = axum::Router::new()
         .merge(routes::api())
         .merge(routes::web())
@@ -60,7 +63,7 @@ async fn main() {
 }
 
 async fn load_config() -> anyhow::Result<Config> {
-    let raw = tokio::fs::read_to_string("Conic.toml").await?;
+    let raw = tokio::fs::read_to_string(".env.toml").await?;
     Ok(toml::from_str::<Config>(&raw)?)
 }
 
@@ -68,13 +71,13 @@ async fn load_config() -> anyhow::Result<Config> {
 struct Config {
     address: String,
     port: usize,
+    database: DatabaseConfig
 }
 
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            address: "0.0.0.0".to_string(),
-            port: 3000,
-        }
-    }
+#[derive(Debug, Clone, Deserialize, Serialize)]
+struct DatabaseConfig {
+    host: String,
+    user: String,
+    password: String,
+    database: String,
 }
