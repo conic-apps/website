@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1280px;height:720px;overflow:hidden;background:#11111b}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;color:#cdd6f4;user-select:none}
+  .win{position:absolute;inset:0;background:linear-gradient(160deg,#151522 0%,#1e1e2e 45%,#0f0f13 100%);overflow:hidden}
+  .glow{position:absolute;border-radius:50%;filter:blur(70px);opacity:.7;pointer-events:none;background:#74c7ec}
+  .bar{position:absolute;top:0;left:0;right:0;height:44px;display:flex;align-items:center;gap:10px;padding:0 16px;background:rgba(30,30,46,.6);border-bottom:1px solid rgba(148,153,203,.12)}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .panel{position:absolute;top:62px;left:30px;right:30px;bottom:66px;background:rgba(41,42,60,.72);border:1px solid rgba(148,153,203,.18);border-radius:16px;padding:24px 0;display:flex;gap:26px;overflow:hidden}
+  .side{width:210px;padding:0 18px;border-right:1px solid rgba(148,153,203,.12);display:flex;flex-direction:column;gap:4px}
+  .navi{display:flex;align-items:center;gap:10px;font-size:14px;color:#a6adc8;padding:9px 12px;border-radius:9px}
+  .navi.on{background:rgba(114,135,253,.16);color:#b4befe;font-weight:700}
+  .navi .cnt{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+  .main2{flex:1;padding:0 26px;overflow:hidden;display:flex;flex-direction:column}
+  .copy{margin-top:8px;font-size:12px;color:#a6adc8;width:300px}
+  .ghead{margin:20px 0 14px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#a6adc8}
+  .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .save{border-radius:14px;background:rgba(30,30,46,.92);border:1px solid rgba(148,153,203,.14);padding:16px;opacity:0}
+  .save .si{border-radius:10px;height:88px;display:flex;align-items:center;justify-content:center;font-size:34px}
+  .save .sn{font-size:15px;font-weight:700;color:#e9e9f0;margin-top:12px}
+  .save .sd{font-size:11.5px;color:#a6adc8;margin-top:3px}
+  .save .sm{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:#a6adc8;margin-top:10px;background:rgba(49,50,68,.8);border-radius:5px;padding:2px 7px;display:inline-block}
+  .footstat{margin-top:auto;padding-top:18px;font-size:12px;color:#a6adc8;font-family:ui-monospace,Menlo,monospace;border-top:1px solid rgba(148,153,203,.12)}
+  .footer{position:absolute;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:14px;padding:0 18px;background:rgba(30,30,46,.82);border-top:1px solid rgba(148,153,203,.12)}
+  .beat{display:flex;align-items:flex-end;gap:2px;height:26px}
+  .beat i{width:3px;background:#74c7ec;border-radius:2px}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="glow" style="width:460px;height:460px;top:20px;right:-100px"></div>
+  <div class="bar">
+    <span class="dot" style="background:#f38ba8"></span>
+    <span class="dot" style="background:#f9e2af"></span>
+    <span class="dot" style="background:#a6e3a1"></span>
+  </div>
+  <div class="panel">
+    <div class="side">
+      <span class="navi">🏠 Home <span class="cnt">1</span></span>
+      <span class="navi" id="nav1">💾 Saves <span class="cnt">3</span></span>
+      <span class="navi on" id="nav2">🧩 Mods <span class="cnt">12</span></span>
+      <span class="navi">🗺 Resource packs <span class="cnt">5</span></span>
+      <span class="navi">📸 Screenshots <span class="cnt">8</span></span>
+      <span class="navi">🗒 Notes <span class="cnt">2</span></span>
+    </div>
+    <div class="main2">
+      <div class="copy" id="copy">Content in <b>Curious Flow</b> · mods folder — grouped by author.</div>
+      <div class="ghead" id="ghead">12 mods · 218 MB</div>
+      <div class="tgrid" id="tgrid"></div>
+      <div class="footstat" id="footstat">3 worlds · 2.1 GB · last backed up 4 h ago</div>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="beat" id="beat"></div>
+  </div>
+</div>
+<script>
+  var saves=[
+    {n:'Sodium',s:'Frame rate optimizations',e:'⚡',bg:'rgba(249,226,175,.2)'},
+    {n:'Iris',s:'Shaders and the modern pipeline',e:'🌈',bg:'rgba(243,139,168,.2)'},
+    {n:'Lithium',s:'Game logic optimizations',e:'🧪',bg:'rgba(180,190,254,.2)'},
+    {n:'Continuity',s:'Connected textures',e:'🧩',bg:'rgba(166,227,161,.2)'},
+    {n:'Mod Menu',s:'Mod management',e:'📦',bg:'rgba(137,180,250,.2)'},
+    {n:'Inventory Profiler',s:'Stress testing and profiling',e:'📈',bg:'rgba(245,194,231,.2)'},
+    {n:'Jade',s:'In-world block inspector',e:'🔍',bg:'rgba(148,226,213,.2)'},
+    {n:'Krypton',s:'Networking optimizations',e:'🔐',bg:'rgba(116,199,236,.2)'},
+    {n:'Not Enough Crashes',s:'Better crash reporting',e:'🧯',bg:'rgba(147,153,178,.2)'},
+  ];
+  var grid=document.getElementById('tgrid');
+  saves.forEach(function(sv,idx){
+    var t=document.createElement('div');t.className='save';t.id='s'+idx;
+    var si=document.createElement('div');si.className='si';si.style.background=sv.bg;si.textContent=sv.e;
+    var sn=document.createElement('div');sn.className='sn';sn.textContent=sv.n;
+    var sd=document.createElement('div');sd.className='sd';sd.textContent=sv.s;
+    var sm=document.createElement('div');sm.className='sm';sm.textContent='v1.2.0 · 2.1 MB';
+    t.appendChild(si);t.appendChild(sn);t.appendChild(sd);t.appendChild(sm);
+    grid.appendChild(t);
+  });
+  var tiles=grid.children;
+  var beat=document.getElementById('beat');
+  for(var i=0;i<44;i++){var b=document.createElement('i');b.style.height='3px';beat.appendChild(b);}
+  var bars=beat.children;
+  function lcn(t){return t=Math.min(1,Math.max(0,t)),1-Math.pow(1-t,3);}
+  window.render=function(p){
+    p=((p%1)+1)%1;
+    // hover ring travels across the grid columns
+    var colSel=0;
+    if(p>0.18){colSel=1;}
+    if(p>0.38){colSel=2;}
+    if(p>0.58){colSel=1;}
+    if(p>0.80){colSel=0;}
+    for(var i=0;i<tiles.length;i++){
+      var t=lcn((p-0.04-i*0.022)/0.4);
+      var col=i%3;
+      var hot=col===colSel;
+      var scale=hot?1.03:1;
+      tiles[i].style.opacity=String(0.2+0.8*Math.min(1,Math.max(0,t)));
+      tiles[i].style.transform='translateY('+((1-Math.min(1,Math.max(0,t)))*12).toFixed(1)+'px) scale('+scale.toFixed(3)+')';
+      tiles[i].style.borderColor=hot?'rgba(116,199,236,.55)':'';
+      tiles[i].style.boxShadow=hot?'0 0 0 1px rgba(116,199,236,.3), 0 10px 26px rgba(0,0,0,.4)':'';
+    }
+    var navs=[['nav1','nav2'],[]];
+    for(var i=0;i<bars.length;i++){
+      var v=(Math.sin(i*0.5+p*Math.PI*2)+Math.sin(i*1.7+p*5.3)*0.6+2)*2.4*0.5+2;
+      bars[i].style.height=(2+Math.max(0,v)*3.4).toFixed(1)+'px';
+    }
+  };
+  render(0);
+</script>
+</body>
+</html>
