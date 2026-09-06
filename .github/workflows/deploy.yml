@@ -1,0 +1,34 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  worker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: worker
+          command: deploy
+
+  pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stage site files
+        run: |
+          mkdir -p public-staging
+          rsync -a --exclude='.git' --exclude='.github' --exclude='.wrangler' --exclude='worker' --exclude='.DS_Store' ./ public-staging/
+      - name: Deploy Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 6743ccf72ff709e5db0476269bfc6ba4
+          command: pages deploy
+          args: public-staging --project-name conic-apps-website --branch main --commit-dirty=true
