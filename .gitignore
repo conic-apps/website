@@ -1,0 +1,15 @@
+# Wrangler cache (local state, not for sharing)
+.wrangler/cache/
+
+# Local virtual environments
+myenv/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,27 @@
+name = "conic-downloads"
+main = "index.js"
+compatibility_date = "2025-01-01"
+account_id = "6743ccf72ff709e5db0476269bfc6ba4"
+
+# Poll GitHub Releases every hour and mirror launcher assets into R2.
+[triggers]
+crons = ["0 * * * *"]
+
+# conic-nexus: online-play dynamic libraries (served at /nexus/<key>)
+[[r2_buckets]]
+binding = "NEXUS"
+bucket_name = "conic-nexus"
+
+# conic-downloads: mirrored launcher installers (served at /launcher/<key>)
+[[r2_buckets]]
+binding = "DOWNLOADS"
+bucket_name = "conic-downloads"
+
+[vars]
+GITHUB_REPO = "conic-apps/launcher"
+CHANNEL = "prerelease"
+
+[[routes]]
+pattern = "dl.conicmc.app"
+zone_name = "conicmc.app"
+custom_domain = true

@@ -1,7 +1,7 @@
 /* ==========================================================================
    Conic Launcher — website behavior
-   Minimal platform JS: reveal, counters, terminal typing, conic geometry,
-   navigation, clock, theme.
+   Minimal platform JS: reveal, counters, conic geometry, navigation,
+   clock, theme, showcase video play/pause.
    ========================================================================== */
 (function () {
   "use strict";
@@ -124,259 +124,31 @@
     });
   }
 
-  /* ------------------------------------------------------------------
-     Launcher replica (hero) — sky, voxel world, beat bars, scaling.
-     Geometry mirrors WindowBackground.vue (hyperbolas at 25% height;
-     voxel terrain with trees), painted as a quiet silhouette layer.
+/* ------------------------------------------------------------------
+     Showcase demo videos — play only while in view; honour reduced motion.
      ------------------------------------------------------------------ */
-  var SVG_NS = "http://www.w3.org/2000/svg";
-
-  /** Hyperbola path (4 branches, rotated) as in the launcher background. */
-  function hyperbolaPath(a, B) {
-    var RANGE = 640,
-      STEP = 8;
-    var CXR = 500,
-      CYR = 140;
-    var ROT = (-40 * Math.PI) / 180;
-    var d = "";
-    [1, -1].forEach(function (sx) {
-      [1, -1].forEach(function (sy) {
-        var acc = "";
-        var first = true;
-        for (var x = a; x <= RANGE; x += STEP) {
-          var y = B * Math.sqrt((x * x) / (a * a) - 1);
-          if (!isFinite(y)) continue;
-          var px = sx * x * Math.cos(ROT) - sy * y * Math.sin(ROT);
-          var py = sx * x * Math.sin(ROT) + sy * y * Math.cos(ROT);
-          acc +=
-            (first ? "M" : "L") +
-            (CXR + px).toFixed(1) +
-            " " +
-            (CYR - py).toFixed(1) +
-            " ";
-          first = false;
-        }
-        if (acc) d += acc;
-      });
-    });
-    return d;
-  }
-
-  /** Deterministic LCG so the replica looks identical on every load. */
-  function makeRng(seed) {
-    var s = seed >>> 0;
-    return function () {
-      s = (s * 1664525 + 1013904223) >>> 0;
-      return s / 4294967296;
-    };
-  }
-
-  /** Loose isometric voxel terrain with the occasional tree. */
-  function buildWindowWorld() {
-    var g = document.querySelector(".lz-world-terrain");
-    if (!g) return;
-    var rng = makeRng(20260906);
-    var W = 1000,
-      H = 420;
-    var horizon = 150,
-      floor = H;
-    var rows = [];
-    var c;
-
-    var colKey = {};
-    for (var row = 0; row < 9; row++) {
-      var d = row / 8;
-      var yBase = horizon + (floor - horizon) * Math.pow(1 - d, 1.5);
-      var size = 88 * Math.pow(1 - d, 1.25) + 6;
-      var alpha = 0.16 + 0.7 * (1 - d); // nearer = more filled
-      var strokeW = 1;
-      var nCols = Math.ceil(W / (size * 1.4)) + 2;
-      rows.push({ d: d, y: yBase, s: size, a: alpha, sw: strokeW, n: nCols });
-    }
-
-    function diamond(cx, cy, s, a) {
-      var p = document.createElementNS(SVG_NS, "path");
-      p.setAttribute(
-        "d",
-        "M" +
-          cx.toFixed(1) +
-          " " +
-          (cy - s / 2).toFixed(1) +
-          " L" +
-          (cx + s).toFixed(1) +
-          " " +
-          cy.toFixed(1) +
-          " L" +
-          cx.toFixed(1) +
-          " " +
-          (cy + s / 2).toFixed(1) +
-          " L" +
-          (cx - s).toFixed(1) +
-          " " +
-          cy.toFixed(1) +
-          " Z",
-      );
-      p.setAttribute("fill", "#ffffff");
-      p.setAttribute("fill-opacity", String(a));
-      p.setAttribute("stroke", "none");
-      return p;
-    }
-
-    function sideFace(cx, cy, s, half, a) {
-      // left face (facing camera-left) — subtle
-      var p = document.createElementNS(SVG_NS, "path");
-      p.setAttribute(
-        "d",
-        "M" +
-          (cx - s).toFixed(1) +
-          " " +
-          cy.toFixed(1) +
-          " L" +
-          cx.toFixed(1) +
-          " " +
-          (cy + s / 2).toFixed(1) +
-          " L" +
-          cx.toFixed(1) +
-          " " +
-          (cy + s / 2 + half).toFixed(1) +
-          " L" +
-          (cx - s).toFixed(1) +
-          " " +
-          (cy + half).toFixed(1) +
-          " Z",
-      );
-      p.setAttribute("fill", "#ffffff");
-      p.setAttribute("fill-opacity", String(a * 0.5));
-      p.setAttribute("stroke", "none");
-      return p;
-    }
-
-    function tree(cx, baseY, s, a) {
-      var trunk = document.createElementNS(SVG_NS, "rect");
-      trunk.setAttribute("x", String(cx - s * 0.09));
-      trunk.setAttribute("y", String(baseY - s * 1.5));
-      trunk.setAttribute("width", String(s * 0.18));
-      trunk.setAttribute("height", String(s * 1.5));
-      trunk.setAttribute("fill", "#ffffff");
-      trunk.setAttribute("fill-opacity", String(a));
-      g.appendChild(trunk);
-      for (var t = 0; t < 4; t++) {
-        var tw = s * (1.5 - t * 0.28);
-        g.appendChild(diamond(cx, baseY - s * 1.6 - t * s * 0.52, tw, a));
-      }
-    }
-
-    for (var r = 0; r < rows.length; r++) {
-      var rowD = rows[r];
-      var startX = r % 2 ? -rowD.s : rowD.s * 0.5;
-      var groundY = rowD.y - rowD.s * 0.5;
-      // fill the near two rows with denser cubes to read as "terrain"
-      var isGround = r >= rows.length - 2;
-      var step = rowD.s * 1.35;
-      if (isGround) step = rowD.s * 0.85; // tighter = solid floor
-      for (var kx = 0; kx < rowD.n; kx++) {
-        var cx = startX + kx * step;
-        if (cx < -rowD.s * 2 || cx > W + rowD.s * 2) continue;
-        var rr = rng();
-        g.appendChild(
-          diamond(cx, groundY, rowD.s, isGround ? rowD.a * 0.55 : rowD.a * 0.3),
-        );
-        g.appendChild(
-          sideFace(
-            cx,
-            groundY,
-            rowD.s,
-            rowD.s * 0.55,
-            isGround ? rowD.a * 0.7 : rowD.a * 0.35,
-          ),
-        );
-        if (rr < 0.06 - rowD.d * 0.05 && !isGround && cx > 0 && cx < W) {
-          tree(cx, groundY, rowD.s * 1.05, rowD.a * 0.5);
-        }
-      }
-    }
-
-    // faint ground fog / floor band at the very bottom
-    var fog = document.createElementNS(SVG_NS, "rect");
-    fog.setAttribute("x", "0");
-    fog.setAttribute("y", String(floor - 8));
-    fog.setAttribute("width", String(W));
-    fog.setAttribute("height", String(24));
-    fog.setAttribute("fill", "#ffffff");
-    fog.setAttribute("fill-opacity", "0.35");
-    g.appendChild(fog);
-  }
-
-  /** Build + animate the footer audio visualizer bars. */
-  function buildBeatBars() {
-    var beat = document.querySelector(".lz-beat");
-    if (!beat) return;
-    var bars = [];
-    var N = 44;
-    var container = beat.getBoundingClientRect ? beat : null;
-    var base = {};
-    for (var i = 0; i < N; i++) {
-      var b = document.createElement("i");
-      beat.appendChild(b);
-      bars.push({ el: b, v: 3 + Math.abs(Math.sin(i * 1.7)) * 16, target: 3 });
-    }
-    if (reduceMotion) return; // static idle bars
-
-    // smooth pseudo-spectrum wander
-    function drive(t) {
-      for (var i = 0; i < bars.length; i++) {
-        var k = (i + 2) * 0.11 + t * 0.00016;
-        var v =
-          (Math.sin(k * 1.0) + Math.sin(k * 2.7 + 1.3) * 0.6 + 1.6) * 5 + 3;
-        bars[i].target = Math.max(2, v);
-        bars[i].v += (bars[i].target - bars[i].v) * 0.16;
-        bars[i].el.style.transform =
-          "scaleY(" + (0.1 + bars[i].v / 26).toFixed(3) + ")";
-      }
-      requestAnimationFrame(drive);
-    }
-    requestAnimationFrame(drive);
-  }
-
-  /** Scale the fixed-design launcher replica to its container width. */
-  function scaleLauncher() {
-    var card = document.querySelector(".hero-card");
-    var win = document.querySelector(".launcher-window");
-    if (!card || !win) return;
-    var avail = card.clientWidth;
-    var ls = Math.min(1, avail / 1000);
-    card.style.setProperty("--ls", String(ls));
-  }
-
-  /** Pause videos that scroll out of view; honour reduced motion. */
   function initVideos() {
-    var vids = document.querySelectorAll(".demo-media video");
+    var vids = document.querySelectorAll(".demo video");
     if (!vids.length) return;
     if (reduceMotion) {
       vids.forEach(function (v) {
         v.autoplay = false;
-        v.setAttribute("preload", "metadata");
         v.pause();
       });
       return;
     }
-    var vp = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (e) {
-          var v = e.target;
-          if (e.isIntersecting) {
-            var p = v.play();
-            if (p) p.catch(function () {});
-          } else {
-            v.pause();
-          }
-        });
-      },
-      { threshold: 0.25 },
-    );
-    vids.forEach(function (v) {
-      vp.observe(v);
-    });
+    var vp = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) {
+          var p = v.play();
+          if (p) p.catch(function () {});
+        } else {
+          v.pause();
+        }
+      });
+    }, { threshold: 0.25 });
+    vids.forEach(function (v) { vp.observe(v); });
   }
 
   /* ------------------------------------------------------------------
@@ -473,24 +245,121 @@
   }
 
   /* ------------------------------------------------------------------
+     Lenis smooth scroll + custom scrollbar.
+     Mirrors kindred launcher's ScrollView behavior: lerp 0.12, thin
+     pill thumb, hidden native scrollbar. Honors reduced motion.
+     ------------------------------------------------------------------ */
+  function initSmoothScroll() {
+    if (typeof window.Lenis !== "function") return;
+    var scrollbar = document.querySelector(".vscrollbar");
+    var thumb = document.querySelector(".vscrollbar-thumb");
+    if (!scrollbar || !thumb) return;
+
+    var lenis = new window.Lenis({
+      lerp: reduceMotion ? 1 : 0.12,
+      smoothWheel: !reduceMotion,
+      anchors: !reduceMotion,
+      autoRaf: true,
+    });
+
+    var MIN_THUMB = 32;
+    var trackH = 0,
+      maxScroll = 0,
+      thumbH = 0,
+      maxThumbTop = 0;
+
+    function measure() {
+      trackH = scrollbar.clientHeight;
+      maxScroll = Math.max(
+        0,
+        document.documentElement.scrollHeight - window.innerHeight,
+      );
+    }
+
+    function update() {
+      measure();
+      if (maxScroll <= 0) {
+        scrollbar.classList.add("hidden");
+        return;
+      }
+      scrollbar.classList.remove("hidden");
+      thumbH = Math.max(
+        MIN_THUMB,
+        trackH *
+          (window.innerHeight / document.documentElement.scrollHeight),
+      );
+      thumb.style.height = thumbH + "px";
+      var clamped = Math.max(0, Math.min(maxScroll, lenis.scroll));
+      maxThumbTop = trackH - thumbH;
+      thumb.style.top =
+        (maxThumbTop <= 0 ? 0 : (clamped / maxScroll) * maxThumbTop) + "px";
+    }
+
+    lenis.on("scroll", update);
+
+    /* thumb drag */
+    var dragging = false,
+      trackTop = 0,
+      dragOffset = 0;
+    thumb.addEventListener("pointerdown", function (e) {
+      dragging = true;
+      trackTop = scrollbar.getBoundingClientRect().top;
+      dragOffset = e.clientY - thumb.getBoundingClientRect().top;
+      thumb.classList.add("dragging");
+      try {
+        thumb.setPointerCapture(e.pointerId);
+      } catch (err) {}
+      e.preventDefault();
+    });
+    thumb.addEventListener("pointermove", function (e) {
+      if (!dragging) return;
+      var top = Math.max(0, Math.min(maxThumbTop, e.clientY - trackTop - dragOffset));
+      if (maxThumbTop > 0 && maxScroll > 0) {
+        lenis.scrollTo((top / maxThumbTop) * maxScroll, { immediate: true });
+      }
+    });
+    function endDrag(e) {
+      if (!dragging) return;
+      dragging = false;
+      thumb.classList.remove("dragging");
+      try {
+        thumb.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+    }
+    thumb.addEventListener("pointerup", endDrag);
+    thumb.addEventListener("pointercancel", endDrag);
+
+    /* track click — jump */
+    scrollbar.addEventListener("pointerdown", function (e) {
+      if (e.target === thumb) return;
+      var top =
+        e.clientY - scrollbar.getBoundingClientRect().top - thumbH / 2;
+      top = Math.max(0, Math.min(maxThumbTop, top));
+      if (maxThumbTop > 0 && maxScroll > 0) {
+        lenis.scrollTo((top / maxThumbTop) * maxScroll, { immediate: true });
+      }
+    });
+
+    /* recalc on layout / size changes */
+    var resizeWatcher = new ResizeObserver(function () {
+      lenis.resize();
+      update();
+    });
+    resizeWatcher.observe(document.documentElement);
+
+    update();
+  }
+
+  /* ------------------------------------------------------------------
      Init
      ------------------------------------------------------------------ */
   function init() {
     buildConics();
-    buildWindowSky();
-    buildWindowWorld();
-    buildBeatBars();
-    scaleLauncher();
+    initSmoothScroll();
     initVideos();
     initReveal();
     initCounters();
     startClock();
-
-    var rsz;
-    window.addEventListener("resize", function () {
-      clearTimeout(rsz);
-      rsz = setTimeout(scaleLauncher, 120);
-    });
   }
 
   if (document.readyState === "loading") {
