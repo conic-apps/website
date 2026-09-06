@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1280px;height:720px;overflow:hidden;background:#11111b}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;color:#cdd6f4;user-select:none}
+  .win{position:absolute;inset:0;background:linear-gradient(160deg,#151522 0%,#1e1e2e 45%,#0f0f13 100%);overflow:hidden}
+  .glow{position:absolute;border-radius:50%;filter:blur(70px);opacity:.75;pointer-events:none;background:#7287fd}
+  /* title bar */
+  .bar{position:absolute;top:0;left:0;right:0;height:44px;display:flex;align-items:center;gap:10px;padding:0 16px;background:rgba(30,30,46,.6);border-bottom:1px solid rgba(148,153,203,.12)}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .searchbar{position:absolute;left:50%;transform:translateX(-50%);width:400px;height:30px;display:flex;align-items:center;gap:8px;background:rgba(49,50,68,.85);border:1px solid rgba(148,153,203,.2);border-radius:9px;padding:0 12px}
+  .searchbar input{border:none;outline:none;background:transparent;color:#cdd6f4;font-size:13px;flex:1;font-family:inherit}
+  .kbd{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#a6adc8;background:rgba(69,71,90,.7);border:1px solid rgba(148,153,203,.25);border-radius:5px;padding:2px 7px}
+  /* main layout */
+  .main{position:absolute;top:44px;left:0;right:0;bottom:56px}
+  .summary{position:absolute;left:40px;top:26px;width:480px}
+  .s-type{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#a6adc8}
+  .s-title{font-size:40px;font-weight:800;letter-spacing:-.015em;margin-top:6px;color:#f4f4f8}
+  .s-specs{display:flex;gap:0;margin-top:14px;align-items:center}
+  .s-spec{display:flex;flex-direction:column;gap:2px;padding:0 16px;border-right:1px solid rgba(148,153,203,.18)}
+  .s-spec:first-child{padding-left:0}
+  .s-spec b{font-size:14px;font-weight:700;color:#cdd6f4}
+  .s-spec span{font-size:11.5px;color:#a6adc8}
+  .s-actions{display:flex;gap:10px;margin-top:20px;align-items:center}
+  .launch{width:122px;height:40px;border:none;border-radius:10px;background:linear-gradient(135deg,#7287fd,#89b4fa);color:#141424;font-weight:800;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit}
+  .mini{width:40px;height:40px;border-radius:10px;background:rgba(49,50,68,.8);border:1px solid rgba(148,153,203,.2);color:#a6adc8;font-size:16px;display:flex;align-items:center;justify-content:center}
+  .s-rows{display:flex;flex-direction:column;gap:10px;margin-top:26px}
+  .s-row{display:flex;align-items:center;gap:12px;font-size:14px}
+  .s-row .lab{width:130px;color:#cdd6f4;font-weight:600}
+  .s-row .track{flex:1;display:flex;gap:3px}
+  .cell{width:26px;height:26px;border-radius:7px;background:rgba(49,50,68,.85)}
+  .cell.hot{background:linear-gradient(135deg,#7287fd,#b4befe)}
+  .s-row .num{width:26px;text-align:right;color:#a6adc8;font-family:ui-monospace,Menlo,monospace;font-size:12.5px}
+  /* rail */
+  .rail{position:absolute;right:0;top:0;width:560px;height:100%;padding:14px 22px}
+  .toolbar{display:flex;align-items:center;gap:12px}
+  .tsearch{flex:1;height:36px;display:flex;align-items:center;gap:8px;background:rgba(49,50,68,.85);border:1px solid rgba(148,153,203,.2);border-radius:9px;padding:0 12px}
+  .tsearch input{border:none;outline:none;background:transparent;color:#cdd6f4;font-size:13px;flex:1;font-family:inherit}
+  .dd{height:36px;display:flex;align-items:center;gap:8px;background:rgba(49,50,68,.85);border:1px solid rgba(148,153,203,.2);border-radius:9px;padding:0 12px;color:#a6adc8;font-size:12.5px;font-family:inherit}
+  .list{margin-top:16px;display:flex;flex-direction:column;gap:4px}
+  .grp{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#a6adc8;margin:6px 2px}
+  .card{display:flex;align-items:center;gap:14px;height:58px;padding:0 16px;border-radius:12px;background:rgba(49,50,68,.65);border:1px solid rgba(148,153,203,.12);border-left:3px solid transparent}
+  .card.sel{background:rgba(69,71,90,.95);border-left-color:#b4befe;box-shadow:0 8px 26px rgba(0,0,0,.45);border-color:rgba(180,190,254,.55)}
+  .icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800}
+  .c-n{font-size:15px;font-weight:700;color:#e9e9f0}
+  .c-s{font-size:11.5px;color:#a6adc8;margin-top:2px;display:flex;align-items:center;gap:6px}
+  .tag{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:rgba(114,135,253,.22);color:#b4befe;border-radius:5px;padding:2px 6px}
+  .c-s .dot-ish{width:4px;height:4px;border-radius:50%;background:#a6adc8}
+  .c-time{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#a6adc8}
+  /* footer */
+  .footer{position:absolute;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:14px;padding:0 18px;background:rgba(30,30,46,.82);border-top:1px solid rgba(148,153,203,.12)}
+  .beat{display:flex;align-items:flex-end;gap:2px;height:26px}
+  .beat i{width:3px;background:#b4befe;border-radius:2px}
+  .sp{width:1px;height:22px;background:rgba(148,153,203,.18)}
+  .who{display:flex;align-items:center;gap:10px;font-size:13px;color:#cdd6f4}
+  .acct{background:rgba(49,50,68,.85);border:1px solid rgba(148,153,203,.2);border-radius:99px;padding:5px 12px;font-size:12px;color:#a6adc8}
+  .fbtn{background:rgba(49,50,68,.85);border:1px solid rgba(148,153,203,.2);border-radius:9px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .fright{margin-left:auto;display:flex;gap:8px;align-items:center}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="glow" style="width:520px;height:520px;left:-160px;top:-140px"></div>
+  <div class="glow" style="width:420px;height:420px;right:-120px;top:40px;opacity:.4"></div>
+  <div class="bar">
+    <span class="dot" style="background:#f38ba8"></span>
+    <span class="dot" style="background:#f9e2af"></span>
+    <span class="dot" style="background:#a6e3a1"></span>
+    <div class="searchbar"><span style="font-size:13px;color:#a6adc8">&#128269;</span><input readonly placeholder="Search or type a command…"><span class="kbd">Ctrl&nbsp;K</span></div>
+  </div>
+  <div class="main">
+    <div class="summary">
+      <div class="s-type">Play&nbsp;time&nbsp;·&nbsp;2&nbsp;h&nbsp;ago</div>
+      <div class="s-title" id="stTitle">Curious&nbsp;Flow</div>
+      <div class="s-specs">
+        <div class="s-spec"><b>1.21.1</b><span>Minecraft version</span></div>
+        <div class="s-spec"><b>0.16.9</b><span>Fabric version</span></div>
+        <div class="s-spec"><b>12</b><span>Mods loaded</span></div>
+      </div>
+      <div class="s-actions">
+        <button class="launch" id="launchBtn"><span style="font-size:13px">&#9654;</span>Launch</button>
+        <button class="mini">▾</button>
+        <button class="mini">⋮</button>
+      </div>
+      <div class="s-rows" id="rows"></div>
+    </div>
+    <div class="rail">
+      <div class="toolbar">
+        <div class="tsearch"><span style="font-size:13px;color:#a6adc8">&#128269;</span><input readonly placeholder="Search instances…"></div>
+        <button class="dd">Sort&nbsp;▾</button>
+        <button class="dd">Group&nbsp;▾</button>
+      </div>
+      <div class="list">
+        <div class="grp">All instances</div>
+        <div class="card" id="c0"><div class="icon" style="background:rgba(114,135,253,.3);color:#b4befe">CF</div><div><div class="c-n">Curious Flow</div><div class="c-s"><span class="tag">Fabric</span><span class="dot-ish"></span>1.21.1<span class="dot-ish"></span>48h</div></div></div>
+        <div class="card" id="c1"><div class="icon" style="background:rgba(166,227,161,.25);color:#a6e3a1">DD</div><div><div class="c-n">Deep Drift</div><div class="c-s"><span class="tag">NeoForge</span><span class="dot-ish"></span>1.20.6<span class="dot-ish"></span>9h</div></div></div>
+        <div class="card" id="c2"><div class="icon" style="background:rgba(249,226,175,.25);color:#f9e2af">RL</div><div><div class="c-n">Redstone Lab</div><div class="c-s"><span class="tag">Fabric</span><span class="dot-ish"></span>1.21.1<span class="dot-ish"></span>2.3h</div></div></div>
+        <div class="card" id="c3"><div class="icon" style="background:rgba(243,139,168,.25);color:#f38ba8">VB</div><div><div class="c-n">Vanilla Beta</div><div class="c-s"><span class="tag">Vanilla</span><span class="dot-ish"></span>b1.7.3<span class="dot-ish"></span>14m</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="beat" id="beat"></div>
+    <div class="sp"></div>
+    <div class="who"><span style="font-size:26px">⛏️</span><span>CuriousFlow</span></div>
+    <div class="fright">
+      <button class="fbtn">⌁</button>
+      <button class="fbtn">+</button>
+      <button class="fbtn">□</button>
+    </div>
+  </div>
+</div>
+<script>
+  var beat=document.getElementById('beat');
+  for(var i=0;i<44;i++){var b=document.createElement('i');b.style.height='3px';beat.appendChild(b);}
+  var bars=beat.children;
+  var rows=document.getElementById('rows');
+  var rowData=[['Saves',3],['Mods',12],['Resource packs',5],['Screenshots',8]];
+  rowData.forEach(function(d){
+    var r=document.createElement('div');r.className='s-row';
+    var lab=document.createElement('span');lab.className='lab';lab.textContent=d[0];
+    var tr=document.createElement('div');tr.className='track';
+    var N=d[1];var full=d[0]==='Mods'?5:3;
+    for(var k=0;k<N;k++){var c=document.createElement('div');c.className='cell'+(k<5?' hot':'');tr.appendChild(c);}
+    var num=document.createElement('span');num.className='num';num.textContent=d[1];
+    r.appendChild(lab);r.appendChild(tr);r.appendChild(num);rows.appendChild(r);
+  });
+  function easeOut(t){t=Math.min(1,Math.max(0,t));return 1-Math.pow(1-t,3);}
+  function easeInOut(t){t=Math.min(1,Math.max(0,t));return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+  var cards=['c0','c1','c2','c3'].map(function(id){return document.getElementById(id);});
+  function launchGlow(p){
+    var g=0.55+0.45*Math.sin(p*Math.PI*2);
+    document.getElementById('launchBtn').style.boxShadow='0 0 '+(10+14*g)+'px rgba(114,135,253,'+(0.25+0.4*g)+')';
+  }
+  window.render=function(p){
+    p=((p%1)+1)%1;
+    var sel;
+    if(p<0.42){sel=0;}
+    else if(p<0.70){sel=3*easeInOut((p-0.42)/0.28);}
+    else {sel=3-3*easeInOut((p-0.70)/0.28);}
+    cards.forEach(function(c,i){
+      var t=easeOut((p-0.04-i*0.085)/0.16);
+      var x=(150*(1-t)).toFixed(1);
+      var act=Math.max(0,1-Math.abs(sel-i));
+      var sc=(1+act*0.05).toFixed(3);
+      var yy=(-8*act).toFixed(1);
+      c.style.opacity=String(0.35+0.65*t);
+      c.style.transform='translateX('+x+'px) scale('+sc+') translateY('+yy+'px)';
+      c.classList.toggle('sel',act>0.5);
+      c.style.zIndex=String(act>0.5?2:1);
+    });
+    for(var i=0;i<bars.length;i++){
+      var v=(Math.sin(i*0.5+p*Math.PI*2)+Math.sin(i*1.7+p*5.3)*0.6+2)*2.4*0.5+2;
+      bars[i].style.height=(2+Math.max(0,v)*3.4).toFixed(1)+'px';
+    }
+    launchGlow(p);
+  };
+  render(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1280px;height:720px;overflow:hidden;background:#11111b}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;color:#cdd6f4;user-select:none}
+  .win{position:absolute;inset:0;background:linear-gradient(160deg,#151522 0%,#1e1e2e 45%,#0f0f13 100%);overflow:hidden}
+  .glow{position:absolute;border-radius:50%;filter:blur(70px);opacity:.7;pointer-events:none;background:#f9e2af}
+  .bar{position:absolute;top:0;left:0;right:0;height:44px;display:flex;align-items:center;gap:10px;padding:0 16px;background:rgba(30,30,46,.6);border-bottom:1px solid rgba(148,153,203,.12)}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .ctr{position:absolute;top:118px;left:35%;width:430px;transform:translateX(-50%)}
+  .c-ic{width:76px;height:76px;border-radius:20px;background:linear-gradient(135deg,rgba(114,135,253,.5),rgba(180,190,254,.35));font-size:40px;display:flex;align-items:center;justify-content:center}
+  .c-title{font-size:32px;font-weight:800;margin-top:16px;color:#f4f4f8;letter-spacing:-.015em}
+  .c-chips{display:flex;gap:8px;margin-top:12px}
+  .chip{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;background:rgba(114,135,253,.18);color:#b4befe;border:1px solid rgba(180,190,254,.4);border-radius:999px;padding:5px 11px}
+  .steps{margin-top:34px;display:flex;flex-direction:column;gap:18px}
+  .step{display:flex;align-items:center;gap:14px}
+  .st-ic{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;background:rgba(49,50,68,.9);color:#a6adc8;border:1px solid rgba(148,153,203,.25)}
+  .st-ic.ok{background:rgba(166,227,161,.2);border-color:rgba(166,227,161,.5);color:#a6e3a1}
+  .st-ic.busy{border-color:rgba(180,190,254,.6);color:#b4befe;box-shadow:0 0 10px rgba(114,135,253,.35)}
+  .st-t{font-size:14.5px;font-weight:700;color:#e9e9f0}
+  .st-s{font-size:11.5px;color:#a6adc8;margin-top:2px}
+  .pbar{width:120px;height:6px;margin-left:auto;border-radius:4px;background:rgba(49,50,68,.9);overflow:hidden}
+  .pbar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#7287fd,#b4befe);border-radius:4px}
+  .st-done{width:100px;margin-left:auto;text-align:right;font-size:12px;color:#a6e3a1;font-weight:700;opacity:0}
+  .curse{position:absolute;right:8%;top:180px;width:420px;display:flex;flex-direction:column;gap:12px;opacity:0}
+  .logrow{display:flex;gap:8px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#a6adc8;padding:7px 11px;background:rgba(30,30,46,.75);border-radius:7px;border:1px solid rgba(148,153,203,.12)}
+  .logrow b{color:#89b4fa;font-weight:700}
+  .logrow.adv{color:#cdd6f4}
+  .logrow.warn{color:#f9e2af}
+  .footer{position:absolute;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:14px;padding:0 18px;background:rgba(30,30,46,.82);border-top:1px solid rgba(148,153,203,.12)}
+  .beat{display:flex;align-items:flex-end;gap:2px;height:26px}
+  .beat i{width:3px;background:#f9e2af;border-radius:2px}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="glow" style="width:520px;height:520px;left:-100px;top:-120px"></div>
+  <div class="glow" style="width:380px;height:380px;right:-80px;bottom:60px;opacity:.4"></div>
+  <div class="bar">
+    <span class="dot" style="background:#f38ba8"></span>
+    <span class="dot" style="background:#f9e2af"></span>
+    <span class="dot" style="background:#a6e3a1"></span>
+  </div>
+  <div class="ctr">
+    <div class="c-ic">⛏️</div>
+    <div class="c-title" id="title">Preparing launch…</div>
+    <div class="c-chips">
+      <span class="chip">1.21.1</span>
+      <span class="chip">Fabric 0.16.9</span>
+      <span class="chip">Java 21</span>
+    </div>
+    <div class="steps" id="steps"></div>
+  </div>
+  <div class="curse" id="curse"></div>
+  <div class="footer">
+    <div class="beat" id="beat"></div>
+  </div>
+</div>
+<script>
+  var steps=[
+    {t:'Preparing game files',s:'Verifying world state…'},
+    {t:'Downloading mods',s:'sodium 0.6.10 · lithium 0.14.3'},
+    {t:'Building classpath',s:'Fabric loader 0.16.9'},
+    {t:'Launching Minecraft',s:'opening 1.21.1 window…'},
+  ];
+  var holder=document.getElementById('steps');
+  var icArr=[],pbarArr=[],doneArr=[];
+  steps.forEach(function(st,idx){
+    var row=document.createElement('div');row.className='step';
+    var ic=document.createElement('div');ic.className='st-ic';
+    row.appendChild(ic);icArr.push(ic);
+    var t=document.createElement('div');
+    t.innerHTML='<div class="st-t"></div><div class="st-s"></div>';
+    t.querySelector('.st-t').textContent=st.t;
+    t.querySelector('.st-s').textContent=st.s;
+    row.appendChild(t);
+    var pb=document.createElement('div');pb.className='pbar';var pi=document.createElement('i');pb.appendChild(pi);
+    row.appendChild(pb);pbarArr.push(pi);
+    var dd=document.createElement('div');dd.className='st-done';dd.textContent='Done';row.appendChild(dd);doneArr.push(dd);
+    holder.appendChild(row);
+  });
+  var curse=document.getElementById('curse');
+  var title=document.getElementById('title');
+  function easeOut(t){t=Math.min(1,Math.max(0,t));return 1-Math.pow(1-t,3);}
+  var bars=[];
+  var beat=document.getElementById('beat');
+  for(var i=0;i<44;i++){var b=document.createElement('i');b.style.height='3px';beat.appendChild(b);}
+  for(var i=0;i<beat.children.length;i++)bars.push(beat.children[i]);
+  window.render=function(p){
+    p=((p%1)+1)%1;
+    // concentric phases: sharpen -> download -> cp -> launch
+    var phaseW=[0.06,0.34,0.60,1.0];
+    var starts=[0,0.10,0.42,0.74];
+    for(var i=0;i<steps.length;i++){
+      var lo=starts[i],hi=starts[i]+(phaseW[i+1]-starts[i])*((i===0)?0.20:0.24);
+      var active=p>=lo&&p<hi;
+      var fi=p>hi;
+      var t=fi?1:(active?easeOut((p-lo)/(hi-lo)):0);
+      if(fi){
+        icArr[i].textContent='✓';
+        icArr[i].className='st-ic ok';
+        doneArr[i].style.opacity='1';
+        pbarArr[i].style.width='100%';
+      } else if(active){
+        icArr[i].textContent='';
+        icArr[i].className='st-ic busy';
+        var spin='';icArr[i].innerHTML='';
+        doneArr[i].style.opacity='0';
+        pbarArr[i].style.width=(100*easeOut(t)*0.9).toFixed(1)+'%';
+      } else {
+        icArr[i].textContent='';
+        icArr[i].className='st-ic';
+        pbarArr[i].style.width='0%';
+        doneArr[i].style.opacity='0';
+      }
+    }
+    var cur=Math.min(4,Math.floor((p-0.1)/0.16)+1);
+    curse.textContent=(p<0.3)?'':'';
+    curse.style.opacity=String(p>0.3?easeOut((p-0.3)/0.15):0);
+    // launch log appearing right side
+    if(p>0.3){
+      var logLines=[];
+      if(p>0.34)logLines.push('<b>[RES]</b> sodium 0.6.10 loaded');
+      if(p>0.46)logLines.push('<b>[RES]</b> lithium 0.14.3 loaded');
+      if(p>0.55)logLines.push('<span class="warn">[WARN] missing glam3d — skipped</span>');
+      if(p>0.66)logLines.push('<b>[LOAD]</b> 84 mods on classpath in 1.2s');
+      if(p>0.82)logLines.push('<b>[HW]</b> using Metal renderer, 144Hz');
+      while(curse.children.length<logLines.length&&curse.children.length<5){
+        var row=document.createElement('div');row.className='logrow adv';curse.appendChild(row);
+      }
+      for(var l=0;l<curse.children.length;l++)curse.children[l].innerHTML=logLines[l]||'&nbsp;';
+    }
+    if(p>0.86){
+      title.textContent='Game launched';
+      title.style.color='#a6e3a1';
+    }
+    var bIdx=4;
+    for(var i=0;i<bars.length;i++){
+      var v=(Math.sin(i*0.5+p*Math.PI*2)+Math.sin(i*1.7+p*5.3)*0.6+2)*2.4*0.5+2;
+      bars[i].style.height=(2+Math.max(0,v)*3.4).toFixed(1)+'px';
+    }
+  };
+  render(0);
+</script>
+</body>
+</html>
