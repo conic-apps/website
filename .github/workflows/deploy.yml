@@ -31,5 +31,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 6743ccf72ff709e5db0476269bfc6ba4
-          command: pages deploy
-          args: public-staging --project-name conic-apps-website --branch main --commit-dirty=true
+          command: pages deploy public-staging --project-name conic-apps-website --branch main --commit-dirty=true
