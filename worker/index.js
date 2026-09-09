@@ -205,24 +205,27 @@ export default {
   },
 };
 
+function redirectTo(path, baseUrl) {
+  const loc = new URL(path, baseUrl).toString();
+  return new Response(null, {
+    status: 302,
+    headers: { Location: loc, "Cache-Control": REDIRECT_TTL },
+  });
+}
+
 async function latestRedirect(baseUrl, env) {
   const os = baseUrl.searchParams.get("os");
   const arch = baseUrl.searchParams.get("arch");
   const kind = baseUrl.searchParams.get("kind");
   if (!os && !arch && !kind) {
-    const res = Response.redirect(new URL("/launcher/latest.json", baseUrl), 302);
-    res.headers.set("Cache-Control", REDIRECT_TTL);
-    return res;
+    return redirectTo("/launcher/latest.json", baseUrl);
   }
   const marker = await readMarker(env);
   const files = marker && Array.isArray(marker.files) ? marker.files : [];
   const match = files.find((f) => f.os === os && f.arch === arch && f.kind === kind);
   if (!match) return new Response("Not Found", { status: 404 });
 
-  const loc = new URL(`/launcher/${encodeURIComponent(match.name)}`, baseUrl);
-  const res = Response.redirect(loc, 302);
-  res.headers.set("Cache-Control", REDIRECT_TTL);
-  return res;
+  return redirectTo(`/launcher/${encodeURIComponent(match.name)}`, baseUrl);
 }
 
 async function statusResponse(env) {
