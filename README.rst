@@ -74,10 +74,13 @@ The download mirror (``dl.conicmc.app``) lives in the ``worker/`` directory.
    cd worker
    wrangler deploy
 
-The worker runs an hourly cron job to sync launcher releases from ``conic-apps/launcher`` into an R2 bucket. It serves installers at stable URLs under ``/launcher/latest/{platform}/{arch}/``.
+The worker runs an hourly cron job to sync launcher releases from ``conic-apps/launcher`` into an R2 bucket. All assets of the latest release are mirrored flat using their original file names (older versions are pruned, keeping only the most recent ``KEEP_RELEASES``). Each file is SHA-256 verified against GitHub's digest before upload and retried up to 3 times; files that still fail are skipped and recorded in ``latest.json`` ``warnings``. Installers are served via redirect at ``/latest?os={os}&arch={arch}&kind={kind}``.
 
 Endpoints:
 
+- ``GET /latest?os=&arch=&kind=`` — 302 redirect to the matching latest asset (no params → redirect to ``/launcher/latest.json``)
+- ``GET /launcher/<key>`` — Serve a mirrored asset directly (real file; responses include a ``Digest: sha-256=`` header)
+- ``GET /launcher/latest.json`` — Versioned metadata (tag, platform/arch, sizes, hashes)
 - ``GET /__sync`` — Trigger on-demand sync (token-protected)
 - ``GET /v1/mirror/status`` — View sync status
 
