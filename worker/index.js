@@ -371,6 +371,10 @@ async function sync(env) {
   const latest = recent[0];
   if (!latest) throw new Error("No matching release found");
 
+  if (!(latest.assets || []).length) {
+    throw new Error(`Release ${latest.tag_name} has no assets yet`);
+  }
+
   const tag = latest.tag_name;
 
   const expected = new Set();
@@ -379,16 +383,10 @@ async function sync(env) {
     for (const n of sourceNames(r.tag_name)) expected.add(n);
   }
 
-  const marker = await readMarker(env);
   const bucket = env.DOWNLOADS;
   const dlHeaders = { "User-Agent": "conic-downloads" };
 
   const warnings = await ensureLatest(bucket, latest, dlHeaders);
-
-  if (marker && marker.tag === tag) {
-    await prune(bucket, expected);
-    return { status: "skipped", tag, updatedAt: marker.updatedAt, warnings };
-  }
 
   const nextMarker = {
     status: "synced",
