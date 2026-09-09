@@ -3,6 +3,12 @@ main = "index.js"
 compatibility_date = "2025-01-01"
 account_id = "6743ccf72ff709e5db0476269bfc6ba4"
 
+# A sync mirrors up to ~26 files; each upload costs 1 fetch + 1 R2 put and the
+# first full sync also touches the marker and prunes stale keys. Free tier caps
+# subrequests at 50/invocation, so raise the limit for the burst.
+[limits]
+subrequest_limit = 200
+
 # Poll GitHub Releases every hour and mirror launcher assets into R2.
 [triggers]
 crons = ["0 * * * *"]
@@ -26,3 +32,7 @@ KEEP_RELEASES = "3"
 pattern = "dl.conicmc.app"
 zone_name = "conicmc.app"
 custom_domain = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
