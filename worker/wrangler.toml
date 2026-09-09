@@ -20,6 +20,7 @@ bucket_name = "conic-downloads"
 [vars]
 GITHUB_REPO = "conic-apps/launcher"
 CHANNEL = "prerelease"
+KEEP_RELEASES = "3"
 
 [[routes]]
 pattern = "dl.conicmc.app"
