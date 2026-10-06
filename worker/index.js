@@ -91,6 +91,7 @@ function detectOs(base) {
   if (/\.(exe|msi)$/.test(base)) return "windows";
   if (/\.(deb|rpm|AppImage)$/.test(base)) return "linux";
   if (/\.dmg$/.test(base) || /\.app\.tar\.gz$/.test(base)) return "macos";
+  if (/\.tar\.gz$/.test(base)) return "linux"; // portable tarball
   return null;
 }
 
@@ -113,6 +114,7 @@ function detectKind(base) {
   if (base.endsWith(".AppImage")) return "appimage";
   if (base.endsWith(".dmg")) return "dmg";
   if (base.endsWith(".app.tar.gz")) return "app";
+  if (base.endsWith(".tar.gz")) return "portable";
   return "";
 }
 
