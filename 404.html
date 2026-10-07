@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page not found — Conic Launcher</title>
+  <meta name="description" content="The page you were looking for does not exist." />
+  <meta name="robots" content="noindex, follow" />
+  <meta name="theme-color" content="#11111b" />
+  <meta name="color-scheme" content="dark light" />
+
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+
+  <!-- Absolute asset paths: this document is served at the requested URL. -->
+  <style>
+    /* Typefaces mirror styles.css: Comfortaa display, Fira Sans text. */
+    @font-face {
+      font-family: "Comfortaa";
+      src: url("/fonts/Comfortaa-Latin.woff2") format("woff2");
+      font-weight: 400 800;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Fira Sans";
+      src: url("/fonts/FiraSans-Regular.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Fira Sans";
+      src: url("/fonts/FiraSans-Medium.woff2") format("woff2");
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      --bg: #11111b;
+      --border-strong: rgba(147, 153, 178, 0.32);
+      --text: #cdd6f4;
+      --text-dim: #a6adc8;
+      --text-faint: #6c7086;
+      --accent: #89b4fa;
+      --cta: #89b4fa;
+      --cta-hover: #74c7ec;
+      --cta-contrast: #11111b;
+      --accent-glow: rgba(137, 180, 250, 0.35);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font-display:
+        "Comfortaa", "Fira Sans", system-ui, ui-rounded, "Helvetica Neue", Arial,
+        sans-serif;
+      --font-body:
+        "Fira Sans", system-ui, -apple-system, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+
+      color-scheme: dark;
+    }
+
+    [data-theme="light"] {
+      --bg: #f2ecdf;
+      --border-strong: rgba(90, 72, 40, 0.42);
+      --text: #2f2620;
+      --text-dim: #5c5146;
+      --text-faint: #887a69;
+      --accent: #1e66f5;
+      --cta: #e8912b;
+      --cta-hover: #f0a03d;
+      --cta-contrast: #2a1d0b;
+      --accent-glow: rgba(30, 102, 245, 0.22);
+
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 32px 20px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    main {
+      width: 100%;
+      max-width: 560px;
+      text-align: center;
+    }
+
+    .code {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(4.5rem, 22vw, 8rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    h1 {
+      margin: 24px 0 10px;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    p.lede {
+      margin: 0 auto;
+      max-width: 44ch;
+      color: var(--text-dim);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 32px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 13px 22px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition:
+        transform 0.2s var(--ease),
+        background 0.25s var(--ease),
+        border-color 0.25s var(--ease),
+        box-shadow 0.25s var(--ease),
+        color 0.25s var(--ease);
+    }
+
+    .btn-primary {
+      background: var(--cta);
+      color: var(--cta-contrast);
+    }
+    .btn-primary:hover,
+    .btn-primary:focus-visible {
+      background: var(--cta-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 0 22px var(--accent-glow);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--border-strong);
+    }
+    .btn-secondary:hover,
+    .btn-secondary:focus-visible {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    .foot {
+      margin-top: 40px;
+      color: var(--text-faint);
+      font-size: 0.78rem;
+    }
+    .foot a {
+      color: var(--text-dim);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition: none !important;
+      }
+    }
+  </style>
+  <script>
+    (function () {
+      "use strict";
+      var saved = null;
+      try {
+        saved = localStorage.getItem("conic-site-theme");
+      } catch (e) {}
+      document.documentElement.setAttribute(
+        "data-theme",
+        saved === "light" ? "light" : "dark"
+      );
+    })();
+  </script>
+</head>
+<body>
+  <main>
+    <p class="code">404</p>
+
+    <h1>This page isn&rsquo;t here</h1>
+    <p class="lede">
+      The link may be outdated or mistyped. Everything else on the site is one
+      click away.
+    </p>
+
+    <div class="actions">
+      <a class="btn btn-primary" href="/">Back to home</a>
+      <a class="btn btn-secondary" href="https://github.com/conic-apps/launcher/releases" target="_blank" rel="noopener">Releases</a>
+    </div>
+
+    <p class="foot">
+      Conic Launcher &middot; <a href="https://github.com/conic-apps/launcher" target="_blank" rel="noopener">GitHub</a>
+      &middot; <a href="/">conicmc.app</a>
+    </p>
+  </main>
+</body>
+</html>

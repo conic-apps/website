@@ -1,5 +1,5 @@
 # Wrangler cache (local state, not for sharing)
-.wrangler/cache/
+.wrangler/
 
 # Local virtual environments
 myenv/
