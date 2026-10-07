@@ -92,6 +92,15 @@ Pushing to ``main`` triggers ``.github/workflows/deploy.yml``, which:
 1. Deploys the ``worker/`` directory as a Cloudflare Worker
 2. Deploys the static site (excluding ``worker/``, ``.github/``, ``.wrangler/``) to Cloudflare Pages
 
+404 Handling
+~~~~~~~~~~~~
+
+Cloudflare Pages assumes a single-page application (and rewrites every unknown path to ``/index.html``
+with a ``200`` status) as long as there is no top-level ``404.html``. The presence of ``404.html``
+turns that fallback off, so unknown paths return a real ``404`` with a styled not-found page. Keep
+``404.html`` in place: removing it would silently restore the catch-all rewrite, which search engines
+treat as soft errors on broken links.
+
 Project Structure
 -----------------
 
@@ -99,6 +108,9 @@ Project Structure
 
    conic-apps/website/
    ├── index.html              # Single-page landing site
+   ├── 404.html                # Not-found page (disables Pages SPA fallback)
+   ├── robots.txt              # Crawler policy
+   ├── sitemap.xml             # Single-URL sitemap
    ├── main.js                 # Scroll reveal, counters, conic geometry, nav, theme
    ├── styles.css              # Design system and responsive styles
    ├── assets/
